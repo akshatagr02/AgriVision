@@ -28,7 +28,6 @@ import "./MapExplorer.css";
 
 interface MapExplorerProps {
   khasraNumber: string;
-  selectedYear: number;
   startDate: string;
   endDate: string;
 }
@@ -220,7 +219,6 @@ function getHealth(ndvi: number) {
 
 export default function MapExplorer({
   khasraNumber,
-  selectedYear,
   startDate,
   endDate,
 }: MapExplorerProps) {

@@ -22,11 +22,6 @@ type Screen = "search" | "year" | "map";
 const MIN_YEAR = 2015;
 const MAX_YEAR = 2026;
 
-const availableYears = Array.from(
-  { length: MAX_YEAR - MIN_YEAR + 1 },
-  (_, index) => MAX_YEAR - index,
-);
-
 function dateString(year: number, month: number, day: number) {
   return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
@@ -82,7 +77,6 @@ export default function App() {
   const [village, setVillage] = useState("Narsara");
   const [district, setDistrict] = useState("Durg");
 
-  const [selectedYear, setSelectedYear] = useState(MAX_YEAR);
   const [startDate, setStartDate] = useState("2016-10-07");
   const [endDate, setEndDate] = useState("2026-10-10");
   const [startDateInput, setStartDateInput] = useState("07/10/2016");
@@ -124,24 +118,11 @@ export default function App() {
     setScreen("year");
   }
 
-  function handleYearPreset(year: number) {
-    const start = dateString(year, 1, 1);
-    const end = dateString(year, 12, 31);
-    setSelectedYear(year);
-    setStartDate(start);
-    setEndDate(end);
-    setStartDateInput(formatDateInput(start));
-    setEndDateInput(formatDateInput(end));
-    setError("");
-  }
-
   function handleStartDateChange(value: string) {
     setStartDate(value);
     setError("");
 
     if (value) {
-      setSelectedYear(Number(value.slice(0, 4)));
-
       // Keep the range valid when the start date moves forward.
       if (endDate && value > endDate) {
         setEndDate(value);
@@ -155,30 +136,12 @@ export default function App() {
     setError("");
 
     if (value) {
-      setSelectedYear(Number(value.slice(0, 4)));
-
       // Keep the range valid when the end date moves backward.
       if (startDate && value < startDate) {
         setStartDate(value);
         setStartDateInput(formatDateInput(value));
       }
     }
-  }
-
-  function openMap() {
-    if (!startDate || !endDate) {
-      setError("Choose both a start date and an end date.");
-      return;
-    }
-
-    if (startDate > endDate) {
-      setError("The start date must be on or before the end date.");
-      return;
-    }
-
-    setSelectedYear(Number(endDate.slice(0, 4)));
-    setError("");
-    setScreen("map");
   }
 
   function openFieldExplorer() {
@@ -616,7 +579,6 @@ export default function App() {
             <MapExplorer
               key={`${khasraNumber}-${startDate}-${endDate}-${village}-${district}`}
               khasraNumber={khasraNumber}
-              selectedYear={selectedYear}
               startDate={startDate}
               endDate={endDate}
             />
