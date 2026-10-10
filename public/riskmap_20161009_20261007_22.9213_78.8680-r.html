@@ -1,0 +1,59 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Risk map</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+ html,body,#map{height:100%;margin:0}
+ .panel{background:#fff;padding:8px 10px;border-radius:6px;box-shadow:0 1px 6px rgba(0,0,0,.4);
+        font:13px/1.35 system-ui,Segoe UI,Arial,sans-serif;width:340px;max-height:72vh;overflow:auto}
+ .sw{display:inline-block;width:12px;height:12px;margin-right:6px;border:1px solid #555;vertical-align:-1px}
+ .star{font-size:26px;color:#e91e63;text-shadow:0 0 3px #fff,0 0 3px #fff;line-height:26px}
+</style></head><body><div id="map"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const D = {"lat": 22.92133, "lon": 78.86802, "radius": 100.0, "radius_km": "0.1", "opacity": 0.8, "bounds": [[22.920482412794062, 78.86703435926253], [22.922282779239563, 78.86898906938134]], "layers": [{"name": "Risk zones", "png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAOnRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjExLjEsIGh0dHBzOi8vbWF0cGxvdGxpYi5vcmcvctoD+AAAAAlwSFlzAAAPYQAAD2EBqD+naQAAAINJREFUeJxjYBgFwx8wEqPosr7+fxhb9+JFvHqYCBn2qU/7/4oPxQwgjG44SS781KcN1tg5sRxFPEKglwGfa5lIMQwdYHMtCy7DiAWX0QxlwmUYIdfhAkzIHL6iq4z4DEMOP1yAhVibWx/GMbY+JNGFyK5EN4yBUnBZX/8/oTQ3CmgDAKtYMgcF7SxfAAAAAElFTkSuQmCC", "on": true}, {"name": "ΔNDVI  (change 20161009→20261007)", "png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAOnRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjExLjEsIGh0dHBzOi8vbWF0cGxvdGxpYi5vcmcvctoD+AAAAAlwSFlzAAAPYQAAD2EBqD+naQAAAQ1JREFUeJyVlTEOwjAMRUnIEbozo4oOXIGJGakdYWflAhyCHUYqMTEwcQIkhnKCbgzcIchUroxx4vClNk2bvnzHjWvyPB9oao6lh7aoaqONdTEA1zkb+tFu0felCQx3iLB71vWnr7ijgkEt7eyvpQcQwlLUsGh6oN+M/fLy6B/gdbs+fY5UqEUYH3SYT9RwJajFl2kbkuYUZG7PrZhR6k4C0WwHk4L6J1TVoeZMc+ok0D9q2aROgsWcoaPQGAun1A+ZhhdKiuM3UtYNx3BoUdXGrmbdXtRchhypDuFF6lICxeAGqw0UBp4gcB3rS1XH0PKFUCoOkMoaLWFfOwXXMyYAhWA/DqmoWynM0O/gDeOVd8MfnuHsAAAAAElFTkSuQmCC", "on": false}, {"name": "ΔMSAVI2  (change 20161009→20261007)", "png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAOnRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjExLjEsIGh0dHBzOi8vbWF0cGxvdGxpYi5vcmcvctoD+AAAAAlwSFlzAAAPYQAAD2EBqD+naQAAAP9JREFUeJydlL0NwkAMhW0rI9BngIgUrEBFjURK6DMFQ9BDSaTUVEyARAETpKNgB5AFFxnH9xOeFCmx7j4/X3QPi6KAmG7H1es6AdjMG4ytRQvIgGgXACirYQPShf35A2NHMVmNKQT7B0oaZqmr22QoOdj6dB8snD3jMA3tHR4WU7CU75b9ewocL4+tOSq7k9Iw2Sj4ly3YGKF2GHOmlSunWWhxypl1Yg3DaeyovMl3fl3d2mfocydBPmg2xp1upqFl1SC5BJHXLOYuJLKKerP17WuALr7cXZajs+vUoyi/UdY7lKO7x5JVl7n4M3JKImvHOmTNxGbJOLPGttKa62/ysnEKLKM6iwAAAABJRU5ErkJggg==", "on": false}, {"name": "ΔNDRE  (change 20161009→20261007)", "png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAOnRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjExLjEsIGh0dHBzOi8vbWF0cGxvdGxpYi5vcmcvctoD+AAAAAlwSFlzAAAPYQAAD2EBqD+naQAAANJJREFUeJxj1NbWZiAEghdO+A+i18YXMBJSy4jNQJgBhAA2C5iwGTb/CAsDCBMC2CxmQuZ8Sp0CNowUEIxmKBOyYdg05Gl/g2NiDGXCZxg5LmXCpSDR5g9W1xICjLIT9v/HZRg+AyZd5cIqzkSMy7ABXJYxkWMYPsCCyzBiwgtdzaSrXNgjhRjDCLqQWMPQIyMPTT0LKWGHLWYnIYmB8jYT3+wcRnINwwaYsGlE10ysYSjFF7FFFqGijAldgBLDUAyESZBafKE7BGuJDQKEggCXjwClaV+9pLwJoAAAAABJRU5ErkJggg==", "on": false}, {"name": "ΔNDMI  (change 20161009→20261007)", "png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAOnRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjExLjEsIGh0dHBzOi8vbWF0cGxvdGxpYi5vcmcvctoD+AAAAAlwSFlzAAAPYQAAD2EBqD+naQAAANRJREFUeJxj1NbWZiAEjm5p/w+irX0qGQmpZcRmIMwAQgCbBUzYDDvMrMkAwoQANouZkDkd2zeADSMFHEUzlAnZMJJMwmEoEy7DbP9eJ8tQJkIKV9YlgDGxgHHzo9t4XYdsWHjTAoIGMqEbhM+rxLiUCZ8kKV7FMBDdZbgMI2QJE6maCIUjEzUNIyrZkAKsfSoZmSo8AxiJcQUxrgMBFjDJwAAuDGARQ6xmnF6uQHMlOcAaWpShlIfIeZqUvIxcLqJECrJLiS0T0QtZrCU2Ma7FVR0AANKaYCxKayDKAAAAAElFTkSuQmCC", "on": false}], "langs": [0], "lookup": {"w": 20, "h": 20, "merc": [8779438.105248718, 2622405.158840109, 8779655.702583792, 2622622.7561751823], "b64": "////////////AAD//////////////////wAAAAAAAAAAAAD///////////8AAAAAAAAAAAAAAAD/////////AAAAAAAAAAAAAAAAAAD//////wAAAAAAAAAAAAAAAAAAAAD///8AAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAQEBAAAAAAAAAP8AAAAAAAAAAAIEBAEBAAAAAAAAAAAAAAAAAAICBAQEBAEBAQAAAAAAAAAAAAACAgQEBAQEAQEBAQAAAAAAAAAAAgICBAQEBAQBAQEBAQEBAQAAAAICAgQEBAQEBAEBAQEBAQEBAAAAAAIEBAQEBAQBAQEBAQEBAQEAAAAAAgQEBAQEAAAAAAAAAAAA//8AAAAABAQEBAAAAAAAAAAAAAD//wAAAAAAAQEAAAAAAAAAAAAAAP///wAAAAAAAAAAAAAAAAAAAAD//////wAAAAAAAAAAAAAAAAAA/////////wAAAAAAAAAAAAAAAP////////////8AAAAAAAAAAP///////w=="}, "risk": {"1": {"color": "#d32f2f", "name": ["Vegetation loss", "वनस्पति का नुकसान"], "reason": ["Green cover fell sharply (NDVI and MSAVI2 down). Possible causes: pest or disease damage, water shortage or waterlogging, or the crop was harvested / cleared.", "हरियाली में तेज़ गिरावट (NDVI व MSAVI2 घटे)। संभावित कारण: कीट/रोग, पानी की कमी या जलभराव, या फसल कट चुकी है।"], "solution": ["Visit these patches now. Check pests, disease, water and drainage. If the crop was not harvested, ask the KVK for treatment advice; re-sow / gap-fill only after the cause is confirmed.", "इन हिस्सों में अभी जाकर कीट, रोग, पानी और जल निकासी जाँचें। फसल कटी नहीं है तो KVK से उपचार की सलाह लें; कारण पक्का होने पर ही दोबारा बुवाई करें।"]}, "2": {"color": "#f28e2b", "name": ["Water stress", "नमी का तनाव"], "reason": ["Moisture in the crop / soil dropped sharply (NDMI down or now below zero).", "फसल/मिट्टी की नमी तेज़ी से घटी है (NDMI घटा या शून्य से नीचे)।"], "solution": ["Check soil moisture; irrigate if dry. Use mulching and better-timed (drip) irrigation to save water.", "मिट्टी की नमी जाँचें; सूखी हो तो सिंचाई करें। मल्चिंग और ड्रिप/सही समय पर सिंचाई अपनाएँ।"]}, "3": {"color": "#f0d000", "name": ["Early nutrient stress", "पोषक तत्व का शुरुआती तनाव"], "reason": ["Leaf chlorophyll (NDRE) is falling while greenness (NDVI) is still steady - an early sign of nitrogen / nutrient shortage.", "पत्तियों का क्लोरोफिल (NDRE) घट रहा है जबकि हरियाली (NDVI) स्थिर है — नाइट्रोजन/पोषक तत्व की कमी का शुरुआती संकेत।"], "solution": ["Look for pale or yellowing leaves, do a soil test, and follow a fertiliser recommendation from the KVK; consider organic / green manure.", "पत्तियों का पीलापन देखें, मिट्टी की जाँच कराएँ और KVK की खाद सलाह अपनाएँ; जैविक/हरी खाद पर विचार करें।"]}, "4": {"color": "#7b1fa2", "name": ["Multiple stresses - highest priority", "एक से ज़्यादा तनाव — सबसे ज़रूरी"], "reason": ["Two or more warning signs (greenness, moisture, chlorophyll) overlap here.", "यहाँ दो या अधिक चेतावनी संकेत (हरियाली, नमी, क्लोरोफिल) एक साथ हैं।"], "solution": ["Inspect these areas first. Check water, nutrients and pests together and get expert (KVK) advice before applying inputs.", "सबसे पहले इन्हीं हिस्सों का निरीक्षण करें। पानी, पोषक तत्व और कीट एक साथ जाँचें; इनपुट डालने से पहले KVK से सलाह लें।"]}}, "html": "<b>Risk report</b><br>2016-10-09 → 2026-10-07 · 22.92133°N, 78.86802°E<div style=\"margin:6px 0\">Layer opacity <input id=\"op\" type=\"range\" min=\"0\" max=\"1\" step=\"0.05\" value=\"0.8\"></div><i>Click anywhere on the map to see the zone type, reason and solution at that spot.</i><hr style='margin:6px 0'><div style=\"margin-bottom:6px\"><span class=\"sw\" style=\"background:#7b1fa2\"></span><b>4. Multiple stresses - highest priority</b> — 0 ha (11.7%)<br><b>Reason:</b> Two or more warning signs (greenness, moisture, chlorophyll) overlap here.<br><b>Solution:</b> Inspect these areas first. Check water, nutrients and pests together and get expert (KVK) advice before applying inputs.</div><div style=\"margin-bottom:6px\"><span class=\"sw\" style=\"background:#d32f2f\"></span><b>1. Vegetation loss</b> — 0 ha (12.4%)<br><b>Reason:</b> Green cover fell sharply (NDVI and MSAVI2 down). Possible causes: pest or disease damage, water shortage or waterlogging, or the crop was harvested / cleared.<br><b>Solution:</b> Visit these patches now. Check pests, disease, water and drainage. If the crop was not harvested, ask the KVK for treatment advice; re-sow / gap-fill only after the cause is confirmed.</div><div style=\"margin-bottom:6px\"><span class=\"sw\" style=\"background:#f28e2b\"></span><b>2. Water stress</b> — 0 ha (4.1%)<br><b>Reason:</b> Moisture in the crop / soil dropped sharply (NDMI down or now below zero).<br><b>Solution:</b> Check soil moisture; irrigate if dry. Use mulching and better-timed (drip) irrigation to save water.</div><div style=\"color:#555;font-size:12px;margin-top:4px\"><i>Satellite-based alert, not a diagnosis. Harvest, ploughing or cloud also lower the indices - confirm in the field before acting.</i></div>"};
+const map = L.map('map');
+const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom: 19, attribution: 'Imagery © Esri'});
+const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {maxZoom: 19, attribution: '© OpenStreetMap contributors'});
+sat.addTo(map);
+const b = L.latLngBounds(D.bounds[0], D.bounds[1]);
+const overlays = {}, imgs = [];
+D.layers.forEach(l => {
+  const o = L.imageOverlay(l.png, b, {opacity: D.opacity, interactive: false});
+  imgs.push(o); overlays[l.name] = o; if (l.on) o.addTo(map);
+});
+const pt = L.marker([D.lat, D.lon], {icon: L.divIcon({className: '', html: '<div class="star">★</div>', iconSize: [26, 26], iconAnchor: [13, 13]})})
+  .bindPopup('<b>Point of interest</b><br>' + D.lat.toFixed(5) + '°N, ' + D.lon.toFixed(5) + '°E').addTo(map);
+L.control.layers({'Satellite (Esri)': sat, 'Street map (OSM)': osm}, overlays, {collapsed: false, position: 'topleft'}).addTo(map);
+L.control.scale({imperial: false}).addTo(map);
+map.fitBounds(b);
+
+const info = L.control({position: 'topright'});
+info.onAdd = () => { const d = L.DomUtil.create('div', 'panel'); d.innerHTML = D.html;
+  L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d); return d; };
+info.addTo(map);
+const op = document.getElementById('op');
+if (op) op.addEventListener('input', () => imgs.forEach(o => o.setOpacity(parseFloat(op.value))));
+
+const bytes = Uint8Array.from(atob(D.lookup.b64), c => c.charCodeAt(0));
+const [mx0, my0, mx1, my1] = D.lookup.merc;
+function classAt(lat, lng) {
+  const x = lng * 20037508.342789244 / 180;
+  const y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) * 6378137;
+  const fx = (x - mx0) / (mx1 - mx0), fy = (my1 - y) / (my1 - my0);
+  if (fx < 0 || fx >= 1 || fy < 0 || fy >= 1) return 255;
+  return bytes[Math.floor(fy * D.lookup.h) * D.lookup.w + Math.floor(fx * D.lookup.w)];
+}
+map.on('click', e => {
+  const k = classAt(e.latlng.lat, e.latlng.lng);
+  let h = '<b>' + e.latlng.lat.toFixed(5) + '°N, ' + e.latlng.lng.toFixed(5) + '°E</b><br>';
+  if (k === 255) h += 'Outside the analysed area.';
+  else if (k === 0) h += 'No risk detected here.';
+  else { const R = D.risk[k];
+    D.langs.forEach(li => { h += '<div style="margin-top:4px"><span class="sw" style="background:' + R.color + '"></span><b>' + k + '. ' + R.name[li] +
+      '</b><br><b>Reason:</b> ' + R.reason[li] + '<br><b>Solution:</b> ' + R.solution[li] + '</div>'; }); }
+  L.popup({maxWidth: 340}).setLatLng(e.latlng).setContent(h).openOn(map);
+});
+</script></body></html>
